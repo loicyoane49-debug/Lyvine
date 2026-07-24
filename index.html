@@ -63,9 +63,11 @@
         .upload-card input[type="file"] { display: none; }
         .custom-file-btn {
             display: flex; align-items: center; justify-content: center; gap: 8px;
-            background: var(--light-bg); border: 2px dashed var(--gray); padding: 12px;
-            border-radius: 10px; cursor: pointer; color: var(--text); font-weight: 500; margin-bottom: 10px;
+            background: var(--light-bg); border: 2px dashed var(--gray); padding: 14px;
+            border-radius: 10px; cursor: pointer; color: var(--text); font-weight: 600; margin-bottom: 10px;
+            transition: background 0.2s;
         }
+        .custom-file-btn:active { background: #e2ede4; }
         .caption-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; outline: none; }
         .submit-btn { background: var(--primary); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
         
@@ -161,11 +163,12 @@
             <h3 style="color: var(--primary); margin-bottom: 15px;">Vos souvenirs</h3>
             
             <div class="upload-card">
+                <!-- Bouton relié à l'input masqué -->
                 <label for="mediaInput" class="custom-file-btn">
-                    <i class="fa-solid fa-images"></i>
-                    <span id="fileLabel">Ouvrir la galerie (photo/vidéo)</span>
+                    <i class="fa-solid fa-photo-film" style="font-size: 20px; color: var(--primary);"></i>
+                    <span id="fileLabel">Accéder à ma galerie (Photo / Vidéo)</span>
                 </label>
-                <!-- accept="image/*,video/*" sans attribut capture force l'accès direct à la galerie -->
+                <!-- Sans attribut 'capture', le système ouvre directement la galerie -->
                 <input type="file" id="mediaInput" accept="image/*,video/*" onchange="updateFileName(this)">
                 <input type="text" id="captionInput" class="caption-input" placeholder="Ajouter une légende...">
                 <button class="submit-btn" onclick="addMemory()">Publier le souvenir</button>
@@ -288,11 +291,9 @@
                 return;
             }
 
-            // Mettre à jour le numéro s'il a changé
             partnerPhone = phone;
             localStorage.setItem('lyvine_partner_phone', partnerPhone);
 
-            // Envoi dans la base Firebase
             database.ref('last_love').set({
                 sender: currentUser,
                 recipientPhone: partnerPhone,
@@ -322,7 +323,7 @@
             if (input.files && input.files[0]) {
                 label.innerText = "Sélectionné : " + input.files[0].name;
             } else {
-                label.innerText = "Ouvrir la galerie (photo/vidéo)";
+                label.innerText = "Accéder à ma galerie (Photo / Vidéo)";
             }
         }
 
@@ -332,7 +333,7 @@
             const file = fileInput.files[0];
 
             if (!file) {
-                alert("Veuillez choisir un fichier depuis votre galerie.");
+                alert("Veuillez choisir une photo ou vidéo dans votre galerie.");
                 return;
             }
 
@@ -350,7 +351,7 @@
                 
                 fileInput.value = '';
                 captionInput.value = '';
-                document.getElementById('fileLabel').innerText = "Ouvrir la galerie (photo/vidéo)";
+                document.getElementById('fileLabel').innerText = "Accéder à ma galerie (Photo / Vidéo)";
             };
             reader.readAsDataURL(file);
         }
