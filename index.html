@@ -58,9 +58,21 @@
         .content-section { padding: 0 20px; display: none; }
         .content-section.active { display: block; }
 
+        /* Styles Historique des pensées (façon conversation) */
+        .love-history { display: flex; flex-direction: column; gap: 6px; max-height: 55vh; overflow-y: auto; padding: 10px 5px; }
+        .chat-bubble { max-width: 78%; padding: 8px 12px; border-radius: 16px; font-size: 14px; line-height: 1.35; word-wrap: break-word; }
+        .chat-bubble.sent { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+        .chat-bubble.received { align-self: flex-start; background: #E9E9EB; color: var(--text); border-bottom-left-radius: 4px; }
+        .chat-bubble .chat-sender { font-size: 11px; font-weight: bold; color: var(--primary); margin-bottom: 2px; }
+        .chat-bubble.sent .chat-sender { display: none; }
+        .chat-bubble .chat-time { font-size: 10px; opacity: 0.7; margin-top: 3px; text-align: right; }
+
         /* Styles Souvenirs (Galerie) */
         .upload-card { background: var(--card-bg); padding: 15px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .upload-card input[type="file"] { display: none; }
+        .upload-card input[type="file"] {
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+        }
         .custom-file-btn {
             display: flex; align-items: center; justify-content: center; gap: 8px;
             background: var(--light-bg); border: 2px dashed var(--gray); padding: 14px;
@@ -141,6 +153,17 @@
         </div>
     </div>
 
+    <!-- Modale Historique des pensées -->
+    <div id="historyModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card" style="max-width: 400px;">
+            <h3>Historique des pensées ❤️</h3>
+            <div class="love-history" id="loveHistory">
+                <!-- Tous les messages envoyés/reçus s'affichent ici -->
+            </div>
+            <button class="close-btn" onclick="closeHistoryModal()">Fermer</button>
+        </div>
+    </div>
+
     <div class="app-container">
         <header>
             <h1 id="appTitle">Lyvine</h1>
@@ -151,10 +174,14 @@
             Chargement des pensées...
         </div>
 
-        <div class="love-section">
+        <div class="love-section" style="display: flex; flex-direction: column; gap: 10px;">
             <button class="love-btn" onclick="openLoveModal()">
                 <i class="fa-solid fa-heart"></i>
                 Envoyer une pensée
+            </button>
+            <button class="love-btn" style="background: linear-gradient(135deg, var(--gray), #6b7a70);" onclick="openHistoryModal()">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                Historique des pensées
             </button>
         </div>
 
@@ -163,13 +190,21 @@
             <h3 style="color: var(--primary); margin-bottom: 15px;">Vos souvenirs</h3>
             
             <div class="upload-card">
-                <!-- Bouton relié à l'input masqué -->
-                <label for="mediaInput" class="custom-file-btn">
-                    <i class="fa-solid fa-photo-film" style="font-size: 20px; color: var(--primary);"></i>
-                    <span id="fileLabel">Accéder à ma galerie (Photo / Vidéo)</span>
-                </label>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <div class="custom-file-btn" style="flex: 1; margin-bottom: 0;" onclick="document.getElementById('mediaInputCamera').click()">
+                        <i class="fa-solid fa-camera" style="font-size: 20px; color: var(--primary);"></i>
+                        <span>Prendre une photo</span>
+                    </div>
+                    <div class="custom-file-btn" style="flex: 1; margin-bottom: 0;" onclick="document.getElementById('mediaInputGallery').click()">
+                        <i class="fa-solid fa-images" style="font-size: 20px; color: var(--primary);"></i>
+                        <span>Ma galerie</span>
+                    </div>
+                </div>
+                <!-- Avec l'attribut 'capture', le système ouvre directement l'appareil photo -->
+                <input type="file" id="mediaInputCamera" accept="image/*,video/*" capture="environment" onchange="updateFileName(this)">
                 <!-- Sans attribut 'capture', le système ouvre directement la galerie -->
-                <input type="file" id="mediaInput" accept="image/*,video/*" onchange="updateFileName(this)">
+                <input type="file" id="mediaInputGallery" accept="image/*,video/*" onchange="updateFileName(this)">
+                <p id="fileLabel" style="font-size: 13px; color: var(--gray); text-align: center; margin-bottom: 10px;">Aucun fichier sélectionné</p>
                 <input type="text" id="captionInput" class="caption-input" placeholder="Ajouter une légende...">
                 <button class="submit-btn" onclick="addMemory()">Publier le souvenir</button>
             </div>
@@ -276,6 +311,16 @@
             document.getElementById('loveModal').style.display = 'none';
         }
 
+        function openHistoryModal() {
+            document.getElementById('historyModal').style.display = 'flex';
+            const historyBox = document.getElementById('loveHistory');
+            historyBox.scrollTop = historyBox.scrollHeight;
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('historyModal').style.display = 'none';
+        }
+
         function applyPresetMessage(selectElement) {
             if (selectElement.value) {
                 document.getElementById('customLoveMessage').value = selectElement.value;
@@ -294,46 +339,85 @@
             partnerPhone = phone;
             localStorage.setItem('lyvine_partner_phone', partnerPhone);
 
-            database.ref('last_love').set({
+            const now = new Date();
+
+            // On ajoute le message à l'historique (au lieu de remplacer le précédent)
+            database.ref('love_messages').push({
                 sender: currentUser,
                 recipientPhone: partnerPhone,
                 text: message,
-                timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                timestamp: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                date: now.toLocaleDateString('fr-FR'),
+                sentAt: now.getTime() // utilisé pour trier par ordre chronologique
             });
 
             closeLoveModal();
         }
 
         function listenToLoveMessages() {
-            database.ref('last_love').on('value', (snapshot) => {
+            database.ref('love_messages').on('value', (snapshot) => {
                 const data = snapshot.val();
                 const messageBox = document.getElementById('lastLoveMessage');
-                if (data) {
-                    const textDisplay = data.text ? `"${data.text}"` : "une pensée";
-                    messageBox.innerHTML = `❤️ <strong>${data.sender}</strong> : ${textDisplay} <br><small style="color:var(--gray)">Reçu à ${data.timestamp} ${data.recipientPhone ? '(Pour '+data.recipientPhone+')' : ''}</small>`;
-                } else {
+                const historyBox = document.getElementById('loveHistory');
+
+                if (!data) {
                     messageBox.innerText = "Aucune pensée envoyée pour l'instant.";
+                    historyBox.innerHTML = '<p style="color: var(--gray); font-size: 14px; text-align: center;">Aucun message pour le moment.</p>';
+                    return;
                 }
+
+                const allMessages = Object.values(data);
+
+                // Dernier message reçu/envoyé affiché en haut de l'écran principal
+                const last = allMessages.slice().sort((a, b) => (b.sentAt || 0) - (a.sentAt || 0))[0];
+                const textDisplay = last.text ? `"${last.text}"` : "une pensée";
+                messageBox.innerHTML = `❤️ <strong>${last.sender}</strong> : ${textDisplay} <br><small style="color:var(--gray)">Reçu à ${last.timestamp} ${last.recipientPhone ? '(Pour '+last.recipientPhone+')' : ''}</small>`;
+
+                // Historique façon conversation : du plus ancien (en haut) au plus récent (en bas)
+                const chatMessages = allMessages.slice().sort((a, b) => (a.sentAt || 0) - (b.sentAt || 0));
+
+                historyBox.innerHTML = '';
+                chatMessages.forEach(msg => {
+                    const isMine = msg.sender === currentUser;
+                    const bubble = document.createElement('div');
+                    bubble.className = 'chat-bubble ' + (isMine ? 'sent' : 'received');
+                    bubble.innerHTML = `
+                        <div class="chat-sender">${msg.sender}</div>
+                        <div>${msg.text || ''}</div>
+                        <div class="chat-time">${msg.date || ''} ${msg.timestamp || ''}</div>
+                    `;
+                    historyBox.appendChild(bubble);
+                });
+
+                // Scroll automatique vers le dernier message (comme dans une conversation)
+                historyBox.scrollTop = historyBox.scrollHeight;
             });
         }
 
         /* --- GESTION DE LA GALERIE --- */
+        let activeMediaInputId = null;
+
         function updateFileName(input) {
             const label = document.getElementById('fileLabel');
             if (input.files && input.files[0]) {
+                activeMediaInputId = input.id;
+                // On vide l'autre input pour ne jamais publier deux fichiers différents par erreur
+                const otherId = input.id === 'mediaInputCamera' ? 'mediaInputGallery' : 'mediaInputCamera';
+                document.getElementById(otherId).value = '';
                 label.innerText = "Sélectionné : " + input.files[0].name;
             } else {
-                label.innerText = "Accéder à ma galerie (Photo / Vidéo)";
+                activeMediaInputId = null;
+                label.innerText = "Aucun fichier sélectionné";
             }
         }
 
         function addMemory() {
-            const fileInput = document.getElementById('mediaInput');
+            const fileInput = activeMediaInputId ? document.getElementById(activeMediaInputId) : null;
             const captionInput = document.getElementById('captionInput');
-            const file = fileInput.files[0];
+            const file = fileInput ? fileInput.files[0] : null;
 
             if (!file) {
-                alert("Veuillez choisir une photo ou vidéo dans votre galerie.");
+                alert("Veuillez prendre une photo ou en choisir une dans votre galerie.");
                 return;
             }
 
@@ -350,8 +434,9 @@
                 database.ref('memories').push(memoryData);
                 
                 fileInput.value = '';
+                activeMediaInputId = null;
                 captionInput.value = '';
-                document.getElementById('fileLabel').innerText = "Accéder à ma galerie (Photo / Vidéo)";
+                document.getElementById('fileLabel').innerText = "Aucun fichier sélectionné";
             };
             reader.readAsDataURL(file);
         }
