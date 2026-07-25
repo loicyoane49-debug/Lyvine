@@ -6,217 +6,295 @@
     <title>Lyvine</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- SDKs Firebase (Compatibilité) -->
+    <!-- SDKs Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <style>
+        /* THÈME ÉMERAUDE VIF ET DYNAMIQUE PAR DÉFAUT */
         :root {
-            --primary: #0F5257;
-            --accent: #2B9348;
-            --light-bg: #F4F9F5;
+            --primary: #00A86B;
+            --primary-gradient: linear-gradient(135deg, #00A86B 0%, #00C853 100%);
+            --accent: #10B981;
+            --accent-gradient: linear-gradient(135deg, #059669 0%, #34D399 100%);
+            --light-bg: #E8F5E9;
             --card-bg: #FFFFFF;
-            --text: #1C2826;
-            --gray: #8B9B90;
+            --text: #064E3B;
+            --gray: #6B7280;
+            --border: rgba(0, 168, 107, 0.2);
+            --shadow: 0 10px 25px -5px rgba(0, 168, 107, 0.22);
+        }
+
+        /* Thème Nuit Émeraude */
+        [data-theme="dark"] {
+            --primary: #059669;
+            --primary-gradient: linear-gradient(135deg, #064E3B 0%, #047857 100%);
+            --accent: #34D399;
+            --accent-gradient: linear-gradient(135deg, #10B981 0%, #6EE7B7 100%);
+            --light-bg: #022C22;
+            --card-bg: #064E3B;
+            --text: #ECFDF5;
+            --gray: #A7F3D0;
+            --border: rgba(52, 211, 153, 0.3);
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Thème Menthe & Or */
+        [data-theme="mint-gold"] {
+            --primary: #00B4D8;
+            --primary-gradient: linear-gradient(135deg, #10B981 0%, #F59E0B 100%);
+            --accent: #F59E0B;
+            --accent-gradient: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+            --light-bg: #FEF3C7;
+            --card-bg: #FFFFFF;
+            --text: #78350F;
+            --gray: #9CA3AF;
+            --border: rgba(245, 158, 11, 0.25);
+            --shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.2);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: var(--light-bg); color: var(--text); display: flex; justify-content: center; }
-        .app-container { width: 100%; max-width: 480px; min-height: 100vh; padding-bottom: 90px; position: relative; }
+        body { background-color: var(--light-bg); color: var(--text); display: flex; justify-content: center; transition: all 0.3s ease; }
+        .app-container { width: 100%; max-width: 480px; min-height: 100vh; padding-bottom: 95px; position: relative; }
 
-        header { background-color: var(--primary); color: white; padding: 20px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+        /* HEADER AVEC ICÔNE VIERGE (FEUILLE) x CANCER (LUNE) */
+        header { 
+            background: var(--primary-gradient); 
+            color: white; padding: 30px 20px 25px 20px; text-align: center; 
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; 
+            position: relative; box-shadow: 0 8px 25px rgba(0, 168, 107, 0.3);
+        }
         
-        /* Modales (Profil & Pensée) */
+        /* LOGO ICÔNE SUR MESURE */
+        .app-logo {
+            width: 60px; height: 60px; margin: 0 auto 12px auto;
+            background: rgba(255, 255, 255, 0.25); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
+            backdrop-filter: blur(10px); border: 2px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        .app-logo i.fa-moon { font-size: 22px; color: #FFF; transform: rotate(-15deg); }
+        .app-logo i.fa-leaf { font-size: 18px; color: #A7F3D0; margin-left: -6px; }
+
+        .notif-badge-btn {
+            position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.25);
+            border: none; color: white; border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
+            backdrop-filter: blur(5px);
+        }
+        .notif-badge-btn:hover { background: rgba(255,255,255,0.4); transform: scale(1.05); }
+
+        /* MODALES */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 1000;
-            backdrop-filter: blur(4px);
+            background: rgba(4, 120, 87, 0.7); display: flex; align-items: center; justify-content: center; z-index: 1000;
+            backdrop-filter: blur(8px);
         }
-        .modal-card { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
-        .modal-card h2, .modal-card h3 { color: var(--primary); margin-bottom: 15px; }
+        .modal-card { background: var(--card-bg); color: var(--text); padding: 25px; border-radius: 28px; width: 88%; max-width: 360px; text-align: center; box-shadow: 0 20px 30px rgba(0,0,0,0.2); border: 1px solid var(--border); }
+        .modal-card h2, .modal-card h3 { color: var(--primary); margin-bottom: 15px; font-weight: 700; }
         .modal-card input, .modal-card select, .modal-card textarea { 
-            width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 14px; outline: none; 
+            width: 100%; padding: 12px 15px; margin-bottom: 12px; border: 1.5px solid var(--border); border-radius: 14px; font-size: 14px; outline: none; background: var(--card-bg); color: var(--text);
         }
-        .modal-card textarea { resize: none; height: 70px; }
-        .modal-card button { background: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 5px; }
-        .modal-card .close-btn { background: #e74c3c; margin-top: 8px; }
+        .modal-card button { background: var(--primary-gradient); color: white; border: none; padding: 14px 20px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .modal-card .close-btn { background: var(--gray); margin-top: 8px; box-shadow: none; }
 
-        /* Bouton d'amour & Notifications */
-        .love-section { padding: 15px 20px; text-align: center; }
+        /* BOUTONS ET CARTES */
+        .love-section { padding: 20px 20px 10px 20px; text-align: center; }
         .love-btn {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: white; border: none; width: 100%; padding: 14px; border-radius: 15px;
-            font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: var(--accent-gradient);
+            color: white; border: none; width: 100%; padding: 16px; border-radius: 18px;
+            font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 6px 18px rgba(0, 168, 107, 0.35); transition: all 0.2s ease;
         }
-        .love-btn i { font-size: 20px; color: #FF6B6B; }
+        .love-btn:active { transform: scale(0.97); }
         
         .status-box {
-            background: var(--card-bg); margin: 10px 20px 0 20px; padding: 12px; border-radius: 12px;
-            text-align: center; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 4px solid var(--primary);
+            background: var(--card-bg); margin: 15px 20px 0 20px; padding: 16px; border-radius: 20px;
+            text-align: center; font-size: 14px; box-shadow: var(--shadow); border: 1.5px solid var(--border);
         }
 
-        .content-section { padding: 0 20px; display: none; }
+        .event-alert-box {
+            background: #D1FAE5; color: #065F46; margin: 15px 20px 0 20px; padding: 14px 16px; border-radius: 16px;
+            font-size: 13px; border-left: 5px solid #10B981; display: none; box-shadow: var(--shadow);
+        }
+
+        .content-section { padding: 15px 20px; display: none; }
         .content-section.active { display: block; }
 
-        /* Styles Historique des pensées (façon conversation) */
-        .love-history { display: flex; flex-direction: column; gap: 6px; max-height: 55vh; overflow-y: auto; padding: 10px 5px; }
-        .chat-bubble { max-width: 78%; padding: 8px 12px; border-radius: 16px; font-size: 14px; line-height: 1.35; word-wrap: break-word; }
-        .chat-bubble.sent { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; }
-        .chat-bubble.received { align-self: flex-start; background: #E9E9EB; color: var(--text); border-bottom-left-radius: 4px; }
-        .chat-bubble .chat-sender { font-size: 11px; font-weight: bold; color: var(--primary); margin-bottom: 2px; }
-        .chat-bubble.sent .chat-sender { display: none; }
-        .chat-bubble .chat-time { font-size: 10px; opacity: 0.7; margin-top: 3px; text-align: right; }
+        /* CHAT */
+        .love-history { display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; padding: 10px 5px; }
+        .chat-bubble { max-width: 80%; padding: 12px 16px; border-radius: 20px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+        .chat-bubble.sent { align-self: flex-end; background: var(--primary-gradient); color: white; border-bottom-right-radius: 4px; }
+        .chat-bubble.received { align-self: flex-start; background: var(--border); color: var(--text); border-bottom-left-radius: 4px; }
+        .chat-bubble .chat-time { font-size: 10px; opacity: 0.8; margin-top: 4px; text-align: right; }
 
-        /* Styles Souvenirs (Galerie) */
-        .upload-card { background: var(--card-bg); padding: 15px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .upload-card input[type="file"] {
-            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-            overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+        /* FORMULAIRES & FEED */
+        .custom-card { background: var(--card-bg); padding: 20px; border-radius: 22px; margin-bottom: 20px; box-shadow: var(--shadow); border: 1.5px solid var(--border); }
+        .custom-card input, .custom-card select, .custom-card textarea { 
+            width: 100%; padding: 12px 14px; margin-bottom: 12px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 14px; outline: none; background: var(--card-bg); color: var(--text);
         }
-        .custom-file-btn {
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            background: var(--light-bg); border: 2px dashed var(--gray); padding: 14px;
-            border-radius: 10px; cursor: pointer; color: var(--text); font-weight: 600; margin-bottom: 10px;
-            transition: background 0.2s;
-        }
-        .custom-file-btn:active { background: #e2ede4; }
-        .caption-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; outline: none; }
-        .submit-btn { background: var(--primary); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        
-        .media-feed { display: flex; flex-direction: column; gap: 15px; }
-        .media-item { background: var(--card-bg); border-radius: 15px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .submit-btn { background: var(--primary-gradient); color: white; border: none; padding: 14px; width: 100%; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(0, 168, 107, 0.2); }
+
+        .media-feed { display: flex; flex-direction: column; gap: 18px; }
+        .media-item { background: var(--card-bg); border-radius: 22px; overflow: hidden; box-shadow: var(--shadow); border: 1px solid var(--border); }
         .media-item img, .media-item video { width: 100%; max-height: 350px; object-fit: cover; display: block; }
-        .media-info { padding: 12px; }
-        .media-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--gray); margin-bottom: 5px; }
+        .media-info { padding: 16px; }
+        .media-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--gray); margin-bottom: 6px; }
 
-        /* Styles Agenda & Calendrier */
+        /* AGENDA */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .calendar-header button { background: none; border: none; font-size: 18px; color: var(--primary); cursor: pointer; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; margin-bottom: 20px; }
-        .day-name { font-weight: bold; font-size: 12px; color: var(--gray); padding-bottom: 5px; }
-        .day-cell { padding: 10px 0; background: var(--card-bg); border-radius: 8px; font-size: 14px; cursor: pointer; position: relative; }
-        .day-cell.today { border: 2px solid var(--accent); font-weight: bold; }
-        .day-cell.selected { background: var(--primary); color: white; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; margin-bottom: 20px; }
+        .day-name { font-weight: 700; font-size: 12px; color: var(--gray); padding-bottom: 5px; }
+        .day-cell { padding: 12px 0; background: var(--card-bg); border-radius: 12px; font-size: 14px; cursor: pointer; font-weight: 600; border: 1px solid var(--border); }
+        .day-cell.today { border: 2px solid var(--primary); color: var(--primary); font-weight: bold; }
+        .day-cell.selected { background: var(--primary-gradient); color: white; border: none; }
 
-        .event-form { background: var(--card-bg); padding: 15px; border-radius: 15px; margin-bottom: 20px; }
-        .event-form input { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 8px; }
-        
-        .event-list { display: flex; flex-direction: column; gap: 10px; }
-        .event-card { background: var(--card-bg); padding: 12px; border-radius: 10px; border-left: 4px solid var(--accent); }
-
-        /* Navigation du bas */
-        .bottom-nav {
-            position: fixed; bottom: 0; width: 100%; max-width: 480px; height: 65px;
-            background: var(--card-bg); display: flex; justify-content: space-around; align-items: center;
-            border-top-left-radius: 20px; border-top-right-radius: 20px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        .event-card, .wish-card, .contact-card { 
+            background: var(--card-bg); padding: 16px; border-radius: 16px; margin-bottom: 12px;
+            box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border);
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--gray); font-size: 12px; border: none; background: none; cursor: pointer; }
-        .nav-item.active { color: var(--primary); font-weight: bold; }
+        .delete-btn { color: #EF4444; background: none; border: none; cursor: pointer; padding: 6px; font-size: 16px; }
+
+        /* RECHERCHE PROCHES */
+        .search-bar { position: relative; margin-bottom: 15px; }
+        .search-bar input {
+            width: 100%; padding: 14px 15px 14px 42px; border: 1.5px solid var(--border);
+            border-radius: 16px; background: var(--card-bg); color: var(--text); font-size: 14px; outline: none; box-shadow: var(--shadow);
+        }
+        .search-bar i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--primary); }
+
+        .contact-info h5 { color: var(--primary); font-size: 16px; margin-bottom: 3px; font-weight: 700; }
+        .contact-badge { display: inline-block; background: var(--border); color: var(--primary); font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 700; margin-top: 4px; }
+
+        /* PARAMÈTRES */
+        .theme-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .theme-option {
+            padding: 12px; border-radius: 16px; border: 2px solid var(--border); background: var(--card-bg);
+            cursor: pointer; text-align: center; font-weight: 700; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.2s;
+        }
+        .theme-option.active { border-color: var(--primary); color: var(--primary); transform: scale(1.03); }
+
+        /* NAVBAR FIXÉE */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 480px; height: 75px;
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px);
+            display: flex; justify-content: space-around; align-items: center;
+            border-top-left-radius: 24px; border-top-right-radius: 24px; box-shadow: 0 -5px 25px rgba(0,0,0,0.08); z-index: 100; border-top: 1px solid var(--border);
+        }
+        [data-theme="dark"] .bottom-nav { background: rgba(6, 78, 59, 0.9); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--gray); font-size: 11px; border: none; background: none; cursor: pointer; flex: 1; transition: 0.2s; font-weight: 600; }
+        .nav-item i { font-size: 19px; margin-bottom: 4px; }
+        .nav-item.active { color: var(--primary); transform: translateY(-2px); font-weight: 700; }
     </style>
 </head>
 <body>
 
-    <!-- Ecran de choix de profil -->
+    <!-- Modale Profil -->
     <div id="profileModal" class="modal-overlay">
         <div class="modal-card">
-            <h2>Bienvenue sur Lyvine ❤️</h2>
-            <p style="font-size: 13px; color: var(--gray); margin-bottom: 15px;">Entrez vos informations :</p>
+            <h2>Bienvenue sur Lyvine 🌿</h2>
+            <p style="font-size: 13px; color: var(--gray); margin-bottom: 15px;">Entrez vos informations pour démarrer :</p>
             <input type="text" id="usernameInput" placeholder="Votre prénom (ex: Alex)">
             <input type="tel" id="partnerPhoneInput" placeholder="Numéro du destinataire (ex: 0612345678)">
             <button onclick="saveProfile()">Accéder à l'application</button>
         </div>
     </div>
 
-    <!-- Modale Envoyer une pensée -->
+    <!-- Modale Pensée -->
     <div id="loveModal" class="modal-overlay" style="display: none;">
         <div class="modal-card">
             <h3>Envoyer une pensée ❤️</h3>
-            
-            <p style="font-size: 12px; color: var(--gray); text-align: left; margin-bottom: 5px;">Numéro de votre partenaire :</p>
-            <input type="tel" id="modalPartnerPhone" placeholder="Numéro du partenaire">
-
-            <p style="font-size: 12px; color: var(--gray); text-align: left; margin-bottom: 5px;">Choisir un message préprogrammé :</p>
             <select id="presetMessages" onchange="applyPresetMessage(this)">
                 <option value="">-- Sélectionner un message --</option>
                 <option value="Je pense très fort à toi ❤️">Je pense très fort à toi ❤️</option>
                 <option value="Tu me manques ! 💕">Tu me manques ! 💕</option>
                 <option value="Passe une merveilleuse journée ☀️">Passe une merveilleuse journée ☀️</option>
                 <option value="Hâte de te retrouver ce soir 🥰">Hâte de te retrouver ce soir 🥰</option>
-                <option value="Un petit bisou doux pour toi 😘">Un petit bisou doux pour toi 😘</option>
             </select>
-
-            <p style="font-size: 12px; color: var(--gray); text-align: left; margin-bottom: 5px;">Ou écrivez votre message :</p>
-            <textarea id="customLoveMessage" placeholder="Écrivez un mot doux..."></textarea>
-
+            <textarea id="customLoveMessage" placeholder="Ou écrivez un mot doux personnalisé..."></textarea>
             <button onclick="confirmSendLove()">Envoyer maintenant</button>
             <button class="close-btn" onclick="closeLoveModal()">Annuler</button>
         </div>
     </div>
 
-    <!-- Modale Historique des pensées -->
+    <!-- Modales Chat & Historique -->
     <div id="historyModal" class="modal-overlay" style="display: none;">
         <div class="modal-card" style="max-width: 400px;">
             <h3>Historique des pensées ❤️</h3>
-            <div class="love-history" id="loveHistory">
-                <!-- Tous les messages envoyés/reçus s'affichent ici -->
-            </div>
+            <div class="love-history" id="loveHistory"></div>
             <button class="close-btn" onclick="closeHistoryModal()">Fermer</button>
+        </div>
+    </div>
+
+    <div id="conversationModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card" style="max-width: 400px; padding: 20px 15px;">
+            <h3 style="margin-bottom: 10px;">Conversation 💬</h3>
+            <div class="love-history" id="conversationHistory"></div>
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                <input type="text" id="conversationInput" placeholder="Écrire un message..." style="flex: 1; margin-bottom: 0;" onkeydown="if(event.key==='Enter'){sendConversationMessage();}">
+                <button style="width: auto; margin-top: 0; padding: 12px 16px;" onclick="sendConversationMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+            <button class="close-btn" onclick="closeConversationModal()">Fermer</button>
         </div>
     </div>
 
     <div class="app-container">
         <header>
+            <button class="notif-badge-btn" onclick="requestNotificationPermission()" title="Activer les notifications">
+                <i class="fa-solid fa-bell"></i>
+            </button>
+            
+            <!-- ICÔNE SUR-MESURE : Vierge (Feuille 🌱) x Cancer (Lune 🌙) -->
+            <div class="app-logo" title="Icône Lyvine : Vierge & Cancer">
+                <i class="fa-solid fa-moon"></i>
+                <i class="fa-solid fa-leaf"></i>
+            </div>
+
             <h1 id="appTitle">Lyvine</h1>
-            <span id="userBadge" style="font-size: 12px; opacity: 0.8;"></span>
+            <span id="userBadge" style="font-size: 12px; opacity: 0.9;"></span>
         </header>
+
+        <div class="event-alert-box" id="eventAlertBox"></div>
 
         <div class="status-box" id="lastLoveMessage">
             Chargement des pensées...
         </div>
 
-        <div class="love-section" style="display: flex; flex-direction: column; gap: 10px;">
+        <div class="love-section" style="display: flex; flex-direction: column; gap: 12px;">
             <button class="love-btn" onclick="openLoveModal()">
                 <i class="fa-solid fa-heart"></i>
                 Envoyer une pensée
             </button>
-            <button class="love-btn" style="background: linear-gradient(135deg, var(--gray), #6b7a70);" onclick="openHistoryModal()">
-                <i class="fa-solid fa-clock-rotate-left"></i>
-                Historique des pensées
-            </button>
+            <div style="display: flex; gap: 10px;">
+                <button class="love-btn" style="background: var(--primary-gradient); flex: 1; font-size: 13px; box-shadow: none;" onclick="openConversationModal()">
+                    <i class="fa-solid fa-comments"></i> Chat
+                </button>
+                <button class="love-btn" style="background: var(--gray); flex: 1; font-size: 13px; box-shadow: none;" onclick="openHistoryModal()">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Historique
+                </button>
+            </div>
         </div>
 
-        <!-- ONGLET 1 : SOUVENIRS -->
-        <div id="feed" class="content-section active">
-            <h3 style="color: var(--primary); margin-bottom: 15px;">Vos souvenirs</h3>
+        <!-- ONGLET 1 : PUBLICATIONS -->
+        <div id="posts" class="content-section active">
+            <h3 style="color: var(--primary); margin-bottom: 15px;">Publications 📸</h3>
             
-            <div class="upload-card">
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <div class="custom-file-btn" style="flex: 1; margin-bottom: 0;" onclick="document.getElementById('mediaInputCamera').click()">
-                        <i class="fa-solid fa-camera" style="font-size: 20px; color: var(--primary);"></i>
-                        <span>Prendre une photo</span>
-                    </div>
-                    <div class="custom-file-btn" style="flex: 1; margin-bottom: 0;" onclick="document.getElementById('mediaInputGallery').click()">
-                        <i class="fa-solid fa-images" style="font-size: 20px; color: var(--primary);"></i>
-                        <span>Ma galerie</span>
-                    </div>
-                </div>
-                <!-- Avec l'attribut 'capture', le système ouvre directement l'appareil photo -->
-                <input type="file" id="mediaInputCamera" accept="image/*,video/*" capture="environment" onchange="updateFileName(this)">
-                <!-- Sans attribut 'capture', le système ouvre directement la galerie -->
+            <div class="custom-card">
+                <h5 style="margin-bottom: 10px; color: var(--primary);">Nouvelle publication</h5>
                 <input type="file" id="mediaInputGallery" accept="image/*,video/*" onchange="updateFileName(this)">
                 <p id="fileLabel" style="font-size: 13px; color: var(--gray); text-align: center; margin-bottom: 10px;">Aucun fichier sélectionné</p>
-                <input type="text" id="captionInput" class="caption-input" placeholder="Ajouter une légende...">
-                <button class="submit-btn" onclick="addMemory()">Publier le souvenir</button>
+                <input type="text" id="captionInput" placeholder="Ajouter une légende...">
+                <button class="submit-btn" onclick="addMemory()">Publier</button>
             </div>
 
-            <div class="media-feed" id="mediaFeed">
-                <!-- Les souvenirs s'afficheront ici -->
-            </div>
+            <div class="media-feed" id="mediaFeed"></div>
         </div>
 
         <!-- ONGLET 2 : AGENDA -->
         <div id="calendar" class="content-section">
-            <h3 style="color: var(--primary); margin-bottom: 15px;">Agenda Partagé</h3>
+            <h3 style="color: var(--primary); margin-bottom: 15px;">Agenda Partagé 📅</h3>
             
             <div class="calendar-header">
                 <button onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
@@ -226,26 +304,114 @@
 
             <div class="calendar-grid" id="calendarDays"></div>
 
-            <div class="event-form">
+            <div class="custom-card">
                 <h5 style="margin-bottom: 10px; color: var(--primary);">Ajouter un événement</h5>
-                <input type="text" id="eventTitle" placeholder="Titre (ex: Resto, Cinéma...)">
-                <input type="date" id="eventDate">
-                <button class="submit-btn" onclick="addEvent()">Enregistrer la date</button>
+                <input type="text" id="eventTitle" placeholder="Titre (ex: Resto, Anniversaire...)">
+                <div style="display: flex; gap: 8px;">
+                    <input type="date" id="eventDate" style="flex: 2;">
+                    <input type="time" id="eventTime" style="flex: 1;">
+                </div>
+                <button class="submit-btn" onclick="addEvent()">Enregistrer</button>
             </div>
 
-            <h4 style="color: var(--primary); margin-bottom: 10px;">Événements à venir</h4>
-            <div class="event-list" id="eventList"></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="color: var(--primary);">Événements à venir</h4>
+                <button onclick="clearPastEvents()" style="background: none; border: none; color: #EF4444; font-size: 12px; cursor: pointer; font-weight: 600;">
+                    <i class="fa-solid fa-broom"></i> Nettoyer
+                </button>
+            </div>
+            
+            <div id="eventList"></div>
         </div>
 
-        <!-- ONGLET 3 : WISHLIST -->
+        <!-- ONGLET 3 : PROCHES -->
+        <div id="contacts" class="content-section">
+            <h3 style="color: var(--primary); margin-bottom: 15px;">Carnet des Proches 👥</h3>
+            
+            <div class="custom-card">
+                <h5 style="margin-bottom: 10px; color: var(--primary);">Nouveau proche</h5>
+                <input type="text" id="contactName" placeholder="Nom et Prénom">
+                <input type="text" id="contactRelation" placeholder="Lien (ex: Ami, Sœur, Oncle...)">
+                <div style="display: flex; gap: 8px;">
+                    <input type="date" id="contactBirthday" style="flex: 1;" title="Date d'anniversaire">
+                    <input type="tel" id="contactPhone" style="flex: 1;" placeholder="Téléphone">
+                </div>
+                <input type="text" id="contactNotes" placeholder="Notes (ex: Idées cadeaux, adresse...)">
+                <button class="submit-btn" onclick="addContact()">Enregistrer le proche</button>
+            </div>
+
+            <h4 style="color: var(--primary); margin-bottom: 10px;">Rechercher un proche</h4>
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="contactSearch" placeholder="Tapez un nom pour afficher..." oninput="filterContacts()">
+            </div>
+
+            <div id="contactsFeed"></div>
+        </div>
+
+        <!-- ONGLET 4 : WISHLIST -->
         <div id="wishlist" class="content-section">
-            <h3 style="color: var(--primary); margin-bottom: 10px;">Wishlist</h3>
+            <h3 style="color: var(--primary); margin-bottom: 15px;">Wishlist 🎁</h3>
+            
+            <div class="custom-card">
+                <h5 style="margin-bottom: 10px; color: var(--primary);">Ajouter une envie</h5>
+                <input type="text" id="wishTitle" placeholder="Ce qui me ferait plaisir...">
+                <input type="text" id="wishDesc" placeholder="Détails (Taille, couleur...)">
+                <input type="url" id="wishLink" placeholder="Lien web (optionnel)">
+                <button class="submit-btn" onclick="addWish()">Ajouter à la liste</button>
+            </div>
+
+            <div id="wishlistFeed"></div>
         </div>
 
+        <!-- ONGLET 5 : PARAMÈTRES -->
+        <div id="settings" class="content-section">
+            <h3 style="color: var(--primary); margin-bottom: 15px;">Paramètres ⚙️</h3>
+            
+            <div class="custom-card">
+                <h5 style="color: var(--primary); margin-bottom: 10px;">Thèmes de couleurs</h5>
+                <p style="font-size: 12px; color: var(--gray); margin-bottom: 12px;">Choisissez l'ambiance visuelle :</p>
+                
+                <div class="theme-selector">
+                    <div class="theme-option active" onclick="setTheme('')" id="theme-default">
+                        <i class="fa-solid fa-gem" style="color: #00A86B;"></i> Émeraude Vif
+                    </div>
+                    <div class="theme-option" onclick="setTheme('dark')" id="theme-dark">
+                        <i class="fa-solid fa-moon" style="color: #34D399;"></i> Nuit Verte
+                    </div>
+                    <div class="theme-option" onclick="setTheme('mint-gold')" id="theme-mint-gold">
+                        <i class="fa-solid fa-sun" style="color: #F59E0B;"></i> Menthe & Or
+                    </div>
+                </div>
+            </div>
+
+            <div class="custom-card">
+                <h5 style="color: var(--primary); margin-bottom: 10px;">Profil & Numéro</h5>
+                <label style="font-size: 12px; color: var(--gray);">Mon Prénom :</label>
+                <input type="text" id="settingsUsername" style="margin-top: 4px;">
+                <label style="font-size: 12px; color: var(--gray);">Numéro du partenaire :</label>
+                <input type="tel" id="settingsPhone" style="margin-top: 4px;">
+                <button class="submit-btn" onclick="updateSettingsProfile()">Mettre à jour</button>
+            </div>
+
+            <div class="custom-card">
+                <h5 style="color: var(--primary); margin-bottom: 10px;">Aide & Maintenance</h5>
+                <button class="submit-btn" style="background: var(--gray); margin-bottom: 10px; box-shadow: none;" onclick="playNotificationSound()">
+                    <i class="fa-solid fa-volume-high"></i> Tester le son
+                </button>
+                <button class="submit-btn" style="background: #EF4444; box-shadow: none;" onclick="resetApp()">
+                    <i class="fa-solid fa-arrow-rotate-left"></i> Réinitialiser l'appareil
+                </button>
+            </div>
+        </div>
+
+        <!-- NAVIGATION -->
         <nav class="bottom-nav">
-            <button class="nav-item active" onclick="switchTab('feed', this)"><i class="fa-solid fa-images"></i>Souvenirs</button>
+            <button class="nav-item active" onclick="switchTab('posts', this)"><i class="fa-solid fa-newspaper"></i>Publis</button>
             <button class="nav-item" onclick="switchTab('calendar', this)"><i class="fa-solid fa-calendar-days"></i>Agenda</button>
+            <button class="nav-item" onclick="switchTab('contacts', this)"><i class="fa-solid fa-user-group"></i>Proches</button>
             <button class="nav-item" onclick="switchTab('wishlist', this)"><i class="fa-solid fa-gift"></i>Wishlist</button>
+            <button class="nav-item" onclick="switchTab('settings', this)"><i class="fa-solid fa-gear"></i>Réglages</button>
         </nav>
     </div>
 
@@ -264,9 +430,12 @@
 
         let currentUser = localStorage.getItem('lyvine_user') || "";
         let partnerPhone = localStorage.getItem('lyvine_partner_phone') || "";
+        let savedTheme = localStorage.getItem('lyvine_theme') || "";
         let currentDate = new Date();
+        let allContactsCache = {};
 
         document.addEventListener("DOMContentLoaded", () => {
+            if (savedTheme) setTheme(savedTheme);
             if (currentUser) {
                 initApp();
             } else {
@@ -293,149 +462,193 @@
             document.getElementById('profileModal').style.display = 'none';
             document.getElementById('userBadge').innerText = "Profil : " + currentUser;
 
+            document.getElementById('settingsUsername').value = currentUser;
+            document.getElementById('settingsPhone').value = partnerPhone;
+
+            requestNotificationPermission();
+
             listenToLoveMessages();
+            listenToConversationMessages();
             loadMemories();
             renderCalendar();
             loadEvents();
+            loadContacts();
+            loadWishlist();
+            checkUpcomingEventsAlerts();
         }
 
-        /* --- MODALE ET GESTION DES PENSÉES --- */
-        function openLoveModal() {
-            document.getElementById('modalPartnerPhone').value = partnerPhone;
-            document.getElementById('customLoveMessage').value = "";
-            document.getElementById('presetMessages').value = "";
-            document.getElementById('loveModal').style.display = 'flex';
+        /* THÈMES */
+        function setTheme(themeName) {
+            document.documentElement.setAttribute('data-theme', themeName);
+            localStorage.setItem('lyvine_theme', themeName);
+            
+            document.querySelectorAll('.theme-option').forEach(el => el.classList.remove('active'));
+            const activeEl = document.getElementById('theme-' + (themeName || 'default'));
+            if (activeEl) activeEl.classList.add('active');
         }
 
-        function closeLoveModal() {
-            document.getElementById('loveModal').style.display = 'none';
-        }
-
-        function openHistoryModal() {
-            document.getElementById('historyModal').style.display = 'flex';
-            const historyBox = document.getElementById('loveHistory');
-            historyBox.scrollTop = historyBox.scrollHeight;
-        }
-
-        function closeHistoryModal() {
-            document.getElementById('historyModal').style.display = 'none';
-        }
-
-        function applyPresetMessage(selectElement) {
-            if (selectElement.value) {
-                document.getElementById('customLoveMessage').value = selectElement.value;
+        function updateSettingsProfile() {
+            const name = document.getElementById('settingsUsername').value.trim();
+            const phone = document.getElementById('settingsPhone').value.trim();
+            if (name) {
+                currentUser = name;
+                partnerPhone = phone;
+                localStorage.setItem('lyvine_user', name);
+                localStorage.setItem('lyvine_partner_phone', phone);
+                document.getElementById('userBadge').innerText = "Profil : " + currentUser;
+                alert("Profil mis à jour !");
             }
         }
 
-        function confirmSendLove() {
-            const message = document.getElementById('customLoveMessage').value.trim();
-            const phone = document.getElementById('modalPartnerPhone').value.trim();
+        function resetApp() {
+            if (confirm("Réinitialiser les données locales ?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
 
-            if (!message) {
-                alert("Veuillez choisir ou écrire un message.");
+        /* SON DE NOTIFICATION */
+        function playNotificationSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } catch(e) {}
+        }
+
+        function requestNotificationPermission() {
+            if ("Notification" in window) {
+                Notification.requestPermission();
+            }
+        }
+
+        /* PROCHES MASQUÉS / RECHERCHE */
+        function addContact() {
+            const name = document.getElementById('contactName').value.trim();
+            const relation = document.getElementById('contactRelation').value.trim();
+            const birthday = document.getElementById('contactBirthday').value;
+            const phone = document.getElementById('contactPhone').value.trim();
+            const notes = document.getElementById('contactNotes').value.trim();
+
+            if (!name) { alert("Veuillez renseigner le nom."); return; }
+
+            database.ref('contacts').push({
+                name: name,
+                relation: relation || "Proche",
+                birthday: birthday || "",
+                phone: phone || "",
+                notes: notes || "",
+                addedBy: currentUser
+            });
+
+            document.getElementById('contactName').value = '';
+            document.getElementById('contactRelation').value = '';
+            document.getElementById('contactBirthday').value = '';
+            document.getElementById('contactPhone').value = '';
+            document.getElementById('contactNotes').value = '';
+            alert("Proche enregistré ! Tapez son nom dans la barre pour l'afficher.");
+        }
+
+        function deleteContact(id) {
+            if (confirm("Supprimer ce proche ?")) {
+                database.ref('contacts/' + id).remove();
+            }
+        }
+
+        function loadContacts() {
+            database.ref('contacts').on('value', (snapshot) => {
+                allContactsCache = snapshot.val() || {};
+                filterContacts();
+            });
+        }
+
+        function renderContacts(data) {
+            const feed = document.getElementById('contactsFeed');
+            feed.innerHTML = '';
+
+            const term = document.getElementById('contactSearch').value.trim();
+
+            if (term === "") {
+                feed.innerHTML = '<p style="color: var(--gray); font-size: 13px; text-align: center; margin-top: 15px;"><i>Tapez un prénom ou un nom pour lancer la recherche.</i></p>';
                 return;
             }
 
-            partnerPhone = phone;
-            localStorage.setItem('lyvine_partner_phone', partnerPhone);
+            if (Object.keys(data).length > 0) {
+                Object.entries(data).forEach(([id, c]) => {
+                    let bdayDisplay = '';
+                    if (c.birthday) {
+                        const bday = new Date(c.birthday);
+                        bdayDisplay = `<br><small style="color: var(--primary); font-weight: 600;"><i class="fa-solid fa-cake-candles"></i> Anniversaire : ${bday.toLocaleDateString('fr-FR', {day: 'numeric', month: 'long'})}</small>`;
+                    }
 
-            const now = new Date();
-
-            // On ajoute le message à l'historique (au lieu de remplacer le précédent)
-            database.ref('love_messages').push({
-                sender: currentUser,
-                recipientPhone: partnerPhone,
-                text: message,
-                timestamp: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                date: now.toLocaleDateString('fr-FR'),
-                sentAt: now.getTime() // utilisé pour trier par ordre chronologique
-            });
-
-            closeLoveModal();
-        }
-
-        function listenToLoveMessages() {
-            database.ref('love_messages').on('value', (snapshot) => {
-                const data = snapshot.val();
-                const messageBox = document.getElementById('lastLoveMessage');
-                const historyBox = document.getElementById('loveHistory');
-
-                if (!data) {
-                    messageBox.innerText = "Aucune pensée envoyée pour l'instant.";
-                    historyBox.innerHTML = '<p style="color: var(--gray); font-size: 14px; text-align: center;">Aucun message pour le moment.</p>';
-                    return;
-                }
-
-                const allMessages = Object.values(data);
-
-                // Dernier message reçu/envoyé affiché en haut de l'écran principal
-                const last = allMessages.slice().sort((a, b) => (b.sentAt || 0) - (a.sentAt || 0))[0];
-                const textDisplay = last.text ? `"${last.text}"` : "une pensée";
-                messageBox.innerHTML = `❤️ <strong>${last.sender}</strong> : ${textDisplay} <br><small style="color:var(--gray)">Reçu à ${last.timestamp} ${last.recipientPhone ? '(Pour '+last.recipientPhone+')' : ''}</small>`;
-
-                // Historique façon conversation : du plus ancien (en haut) au plus récent (en bas)
-                const chatMessages = allMessages.slice().sort((a, b) => (a.sentAt || 0) - (b.sentAt || 0));
-
-                historyBox.innerHTML = '';
-                chatMessages.forEach(msg => {
-                    const isMine = msg.sender === currentUser;
-                    const bubble = document.createElement('div');
-                    bubble.className = 'chat-bubble ' + (isMine ? 'sent' : 'received');
-                    bubble.innerHTML = `
-                        <div class="chat-sender">${msg.sender}</div>
-                        <div>${msg.text || ''}</div>
-                        <div class="chat-time">${msg.date || ''} ${msg.timestamp || ''}</div>
+                    feed.innerHTML += `
+                        <div class="contact-card">
+                            <div class="contact-info">
+                                <h5>${c.name}</h5>
+                                <span class="contact-badge">${c.relation}</span>
+                                ${bdayDisplay}
+                                ${c.phone ? `<p style="font-size:13px; margin-top:4px;"><i class="fa-solid fa-phone"></i> ${c.phone}</p>` : ''}
+                                ${c.notes ? `<p style="color: var(--gray); font-size: 12px; margin-top: 3px;"><i>${c.notes}</i></p>` : ''}
+                            </div>
+                            <button class="delete-btn" onclick="deleteContact('${id}')"><i class="fa-solid fa-trash"></i></button>
+                        </div>
                     `;
-                    historyBox.appendChild(bubble);
                 });
-
-                // Scroll automatique vers le dernier message (comme dans une conversation)
-                historyBox.scrollTop = historyBox.scrollHeight;
-            });
+            } else {
+                feed.innerHTML = '<p style="color: var(--gray); font-size: 14px; text-align: center; margin-top: 10px;">Aucun résultat trouvé.</p>';
+            }
         }
 
-        /* --- GESTION DE LA GALERIE --- */
-        let activeMediaInputId = null;
+        function filterContacts() {
+            const term = document.getElementById('contactSearch').value.toLowerCase().trim();
+            if (term === "") {
+                renderContacts({});
+                return;
+            }
 
+            const filtered = {};
+            Object.entries(allContactsCache).forEach(([id, c]) => {
+                if (c.name.toLowerCase().includes(term) || c.relation.toLowerCase().includes(term)) {
+                    filtered[id] = c;
+                }
+            });
+
+            renderContacts(filtered);
+        }
+
+        /* PUBLICATIONS */
         function updateFileName(input) {
             const label = document.getElementById('fileLabel');
-            if (input.files && input.files[0]) {
-                activeMediaInputId = input.id;
-                // On vide l'autre input pour ne jamais publier deux fichiers différents par erreur
-                const otherId = input.id === 'mediaInputCamera' ? 'mediaInputGallery' : 'mediaInputCamera';
-                document.getElementById(otherId).value = '';
-                label.innerText = "Sélectionné : " + input.files[0].name;
-            } else {
-                activeMediaInputId = null;
-                label.innerText = "Aucun fichier sélectionné";
-            }
+            label.innerText = input.files && input.files[0] ? "Sélectionné : " + input.files[0].name : "Aucun fichier sélectionné";
         }
 
         function addMemory() {
-            const fileInput = activeMediaInputId ? document.getElementById(activeMediaInputId) : null;
-            const captionInput = document.getElementById('captionInput');
-            const file = fileInput ? fileInput.files[0] : null;
+            const input = document.getElementById('mediaInputGallery');
+            const file = input.files[0];
+            const caption = document.getElementById('captionInput').value.trim();
 
-            if (!file) {
-                alert("Veuillez prendre une photo ou en choisir une dans votre galerie.");
-                return;
-            }
+            if (!file) { alert("Veuillez choisir une photo ou vidéo."); return; }
 
             const reader = new FileReader();
             reader.onload = function (e) {
-                const memoryData = {
+                database.ref('memories').push({
                     author: currentUser,
-                    caption: captionInput.value.trim(),
+                    caption: caption,
                     type: file.type.startsWith('video/') ? 'video' : 'image',
                     src: e.target.result,
                     date: new Date().toLocaleDateString('fr-FR')
-                };
-
-                database.ref('memories').push(memoryData);
-                
-                fileInput.value = '';
-                activeMediaInputId = null;
-                captionInput.value = '';
+                });
+                input.value = '';
+                document.getElementById('captionInput').value = '';
                 document.getElementById('fileLabel').innerText = "Aucun fichier sélectionné";
             };
             reader.readAsDataURL(file);
@@ -446,100 +659,74 @@
                 const feed = document.getElementById('mediaFeed');
                 feed.innerHTML = '';
                 const data = snapshot.val();
-
                 if (data) {
                     Object.values(data).reverse().forEach(item => {
-                        const card = document.createElement('div');
-                        card.className = 'media-item';
-
-                        const mediaTag = item.type === 'video' 
-                            ? `<video src="${item.src}" controls></video>`
-                            : `<img src="${item.src}" alt="Souvenir">`;
-
-                        card.innerHTML = `
-                            ${mediaTag}
-                            <div class="media-info">
-                                <div class="media-meta">
-                                    <span><strong>${item.author}</strong></span>
-                                    <span>${item.date}</span>
+                        feed.innerHTML += `
+                            <div class="media-item">
+                                ${item.type === 'video' ? `<video src="${item.src}" controls></video>` : `<img src="${item.src}">`}
+                                <div class="media-info">
+                                    <div class="media-meta"><strong>${item.author}</strong><span>${item.date}</span></div>
+                                    <p style="font-size: 14px;">${item.caption}</p>
                                 </div>
-                                <p style="font-size: 14px;">${item.caption}</p>
                             </div>
                         `;
-                        feed.appendChild(card);
                     });
-                } else {
-                    feed.innerHTML = '<p style="color: var(--gray); font-size: 14px; text-align: center;">Aucun souvenir partagé pour le moment.</p>';
-                }
+                } else feed.innerHTML = '<p style="color: var(--gray); font-size: 14px; text-align: center;">Aucune publication pour l\'instant.</p>';
             });
         }
 
-        /* --- CALENDRIER & EVENTS --- */
+        /* AGENDA */
         function renderCalendar() {
             const daysContainer = document.getElementById('calendarDays');
-            const monthYearText = document.getElementById('calendarMonthYear');
             daysContainer.innerHTML = '';
-            
             const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
-            const dayNames = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
-
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
 
-            monthYearText.innerText = `${monthNames[month]} ${year}`;
+            document.getElementById('calendarMonthYear').innerText = `${monthNames[month]} ${year}`;
+            ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"].forEach(day => daysContainer.innerHTML += `<div class="day-name">${day}</div>`);
 
-            dayNames.forEach(day => {
-                daysContainer.innerHTML += `<div class="day-name">${day}</div>`;
-            });
-
-            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-            let startingIndex = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+            let startingIndex = firstDay === 0 ? 6 : firstDay - 1;
 
-            for (let i = 0; i < startingIndex; i++) {
-                daysContainer.innerHTML += `<div></div>`;
-            }
+            for (let i = 0; i < startingIndex; i++) daysContainer.innerHTML += `<div></div>`;
 
             const today = new Date();
             for (let day = 1; day <= daysInMonth; day++) {
                 const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                
-                daysContainer.innerHTML += `
-                    <div class="day-cell ${isToday ? 'today' : ''}" onclick="selectDate('${dateStr}', this)">
-                        ${day}
-                    </div>
-                `;
+                daysContainer.innerHTML += `<div class="day-cell ${isToday ? 'today' : ''}" onclick="selectDate('${dateStr}', this)">${day}</div>`;
             }
         }
 
-        function changeMonth(direction) {
-            currentDate.setMonth(currentDate.getMonth() + direction);
-            renderCalendar();
-        }
-
-        function selectDate(dateStr, element) {
+        function changeMonth(d) { currentDate.setMonth(currentDate.getMonth() + d); renderCalendar(); }
+        function selectDate(d, el) {
             document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('selected'));
-            element.classList.add('selected');
-            document.getElementById('eventDate').value = dateStr;
+            el.classList.add('selected');
+            document.getElementById('eventDate').value = d;
         }
 
         function addEvent() {
             const title = document.getElementById('eventTitle').value.trim();
             const date = document.getElementById('eventDate').value;
+            const time = document.getElementById('eventTime').value;
 
-            if (!title || !date) {
-                alert("Veuillez saisir un titre et sélectionner une date.");
-                return;
-            }
+            if (!title || !date) { alert("Titre et date requis."); return; }
 
-            database.ref('events').push({
-                title: title,
-                date: date,
-                author: currentUser
-            });
-
+            database.ref('events').push({ title: title, date: date, time: time || "", author: currentUser });
             document.getElementById('eventTitle').value = '';
+            document.getElementById('eventTime').value = '';
+        }
+
+        function deleteEvent(id) { database.ref('events/' + id).remove(); }
+        function clearPastEvents() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            database.ref('events').once('value', (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+                Object.keys(data).forEach(id => { if (data[id].date < todayStr) database.ref('events/' + id).remove(); });
+            });
         }
 
         function loadEvents() {
@@ -547,27 +734,128 @@
                 const list = document.getElementById('eventList');
                 list.innerHTML = '';
                 const data = snapshot.val();
-
                 if (data) {
-                    Object.values(data).sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(evt => {
-                        const formattedDate = new Date(evt.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+                    Object.entries(data).sort((a,b) => new Date(a[1].date) - new Date(b[1].date)).forEach(([id, evt]) => {
                         list.innerHTML += `
                             <div class="event-card">
-                                <strong>${evt.title}</strong>
-                                <div style="font-size: 12px; color: var(--gray); margin-top: 4px;">
-                                    <span><i class="fa-regular fa-calendar"></i> ${formattedDate}</span> • 
-                                    <span>Ajouté par ${evt.author}</span>
+                                <div>
+                                    <strong>${evt.title}</strong>
+                                    <div style="font-size: 12px; color: var(--gray); margin-top: 3px;">
+                                        ${new Date(evt.date).toLocaleDateString('fr-FR')} ${evt.time ? 'à '+evt.time : ''} • par ${evt.author}
+                                    </div>
                                 </div>
+                                <button class="delete-btn" onclick="deleteEvent('${id}')"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         `;
                     });
-                } else {
-                    list.innerHTML = '<p style="color: var(--gray); font-size: 14px;">Aucun événement prévu.</p>';
+                } else list.innerHTML = '<p style="color: var(--gray); font-size: 14px;">Aucun événement.</p>';
+            });
+        }
+
+        /* WISHLIST */
+        function addWish() {
+            const title = document.getElementById('wishTitle').value.trim();
+            if (!title) return;
+            database.ref('wishlist').push({
+                title: title, description: document.getElementById('wishDesc').value.trim(),
+                link: document.getElementById('wishLink').value.trim(), author: currentUser
+            });
+            document.getElementById('wishTitle').value = '';
+            document.getElementById('wishDesc').value = '';
+            document.getElementById('wishLink').value = '';
+        }
+
+        function deleteWish(id) { database.ref('wishlist/' + id).remove(); }
+
+        function loadWishlist() {
+            database.ref('wishlist').on('value', (snapshot) => {
+                const feed = document.getElementById('wishlistFeed');
+                feed.innerHTML = '';
+                const data = snapshot.val();
+                if (data) {
+                    Object.entries(data).reverse().forEach(([id, wish]) => {
+                        feed.innerHTML += `
+                            <div class="wish-card">
+                                <div>
+                                    <h5>${wish.title}</h5>
+                                    ${wish.description ? `<p style="font-size: 13px;">${wish.description}</p>` : ''}
+                                    ${wish.link ? `<p><a href="${wish.link}" target="_blank" style="color: var(--primary); font-size: 12px;">Voir le produit</a></p>` : ''}
+                                </div>
+                                <button class="delete-btn" onclick="deleteWish('${id}')"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        `;
+                    });
+                } else feed.innerHTML = '<p style="color: var(--gray); font-size: 14px; text-align: center;">La wishlist est vide.</p>';
+            });
+        }
+
+        /* MESSAGERIE */
+        function openLoveModal() { document.getElementById('loveModal').style.display = 'flex'; }
+        function closeLoveModal() { document.getElementById('loveModal').style.display = 'none'; }
+        function openHistoryModal() { document.getElementById('historyModal').style.display = 'flex'; }
+        function closeHistoryModal() { document.getElementById('historyModal').style.display = 'none'; }
+        function openConversationModal() { document.getElementById('conversationModal').style.display = 'flex'; }
+        function closeConversationModal() { document.getElementById('conversationModal').style.display = 'none'; }
+
+        function applyPresetMessage(s) { if(s.value) document.getElementById('customLoveMessage').value = s.value; }
+        function confirmSendLove() {
+            const msg = document.getElementById('customLoveMessage').value.trim();
+            if (!msg) return;
+            database.ref('love_messages').push({
+                sender: currentUser, text: msg, timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), sentAt: new Date().getTime()
+            });
+            closeLoveModal();
+        }
+
+        function listenToLoveMessages() {
+            database.ref('love_messages').on('value', (s) => {
+                const data = s.val();
+                if (!data) return;
+                const last = Object.values(data).sort((a,b) => b.sentAt - a.sentAt)[0];
+                document.getElementById('lastLoveMessage').innerHTML = `❤️ <strong>${last.sender}</strong> : "${last.text}"`;
+            });
+        }
+
+        function sendConversationMessage() {
+            const input = document.getElementById('conversationInput');
+            if(!input.value.trim()) return;
+            database.ref('conversation_messages').push({
+                sender: currentUser, text: input.value.trim(), timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), sentAt: new Date().getTime()
+            });
+            input.value = '';
+        }
+
+        function listenToConversationMessages() {
+            database.ref('conversation_messages').on('value', (s) => {
+                const box = document.getElementById('conversationHistory');
+                box.innerHTML = '';
+                const data = s.val();
+                if(data) {
+                    Object.values(data).sort((a,b) => a.sentAt - b.sentAt).forEach(msg => {
+                        box.innerHTML += `
+                            <div class="chat-bubble ${msg.sender === currentUser ? 'sent' : 'received'}">
+                                <div>${msg.text}</div>
+                                <div class="chat-time">${msg.timestamp}</div>
+                            </div>
+                        `;
+                    });
                 }
             });
         }
 
-        /* --- NAVIGATION --- */
+        function checkUpcomingEventsAlerts() {
+            database.ref('events').once('value', (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+                const todayStr = new Date().toISOString().split('T')[0];
+                const todayEvents = Object.values(data).filter(e => e.date === todayStr);
+                if (todayEvents.length > 0) {
+                    document.getElementById('eventAlertBox').innerHTML = `⚠️ <strong>Rappel aujourd'hui :</strong> ${todayEvents.map(e => e.title).join(', ')}`;
+                    document.getElementById('eventAlertBox').style.display = 'block';
+                }
+            });
+        }
+
         function switchTab(tabId, element) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
