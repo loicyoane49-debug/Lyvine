@@ -466,7 +466,7 @@
             document.getElementById('settingsUsername').value = currentUser;
             document.getElementById('settingsPhone').value = partnerPhone;
 
-            requestNotificationPermission();
+            syncOneSignalLogin();
 
             listenToLoveMessages();
             listenToConversationMessages();
@@ -540,8 +540,18 @@
         function requestNotificationPermission() {
             if (!currentUser) return;
             OneSignalDeferred.push(async function (OneSignal) {
-                await OneSignal.login(currentUser);
                 await OneSignal.Notifications.requestPermission();
+                await OneSignal.login(currentUser);
+                database.ref('users/' + currentUser).update({ active: true });
+            });
+        }
+
+        // Appelé automatiquement au chargement : ne redemande rien, juste ré-associe
+        // le profil si la permission a déjà été accordée précédemment.
+        function syncOneSignalLogin() {
+            if (!currentUser) return;
+            OneSignalDeferred.push(async function (OneSignal) {
+                await OneSignal.login(currentUser);
                 database.ref('users/' + currentUser).update({ active: true });
             });
         }
