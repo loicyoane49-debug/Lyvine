@@ -526,10 +526,11 @@
             } catch(e) {}
         }
 
-        /* NOTIFICATIONS PUSH (OneSignal) */
-        // ⚠️ Remplace ces deux valeurs par les tiennes (Dashboard OneSignal > Settings > Keys & IDs)
+        /* NOTIFICATIONS PUSH (OneSignal, via un relais Cloudflare Worker) */
+        // ⚠️ Remplace cette valeur par l'adresse de ton Worker une fois déployé
+        // (ex: "https://lyvine-push.tonpseudo.workers.dev")
         const ONESIGNAL_APP_ID = "d865bb62-492e-49fd-989d-33074c670509";
-        const ONESIGNAL_REST_API_KEY = "os_v2_app_3bs3wysjfze73ge5gmduyzyfbfzqila66fcupcfe5pbc5j35s6xvqqbtblpmg2mzd47ej45xauisqajjmuwse7nrhhz6y3ureura76a";
+        const PUSH_RELAY_URL = "https://lyvine-push.loicyoane49.workers.dev";
 
         window.OneSignalDeferred = window.OneSignalDeferred || [];
 
@@ -556,7 +557,7 @@
             });
         }
 
-        // Envoie une notification à l'autre personne (pas à soi-même)
+        // Envoie une notification à l'autre personne (pas à soi-même), via le relais
         async function sendPushToPartner(title, body) {
             try {
                 const snap = await database.ref('users').once('value');
@@ -564,19 +565,10 @@
                 const targets = Object.keys(users).filter(name => name !== currentUser);
                 if (targets.length === 0) return;
 
-                await fetch('https://api.onesignal.com/notifications', {
+                await fetch(PUSH_RELAY_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json; charset=utf-8',
-                        'Authorization': 'Key ' + ONESIGNAL_REST_API_KEY
-                    },
-                    body: JSON.stringify({
-                        app_id: ONESIGNAL_APP_ID,
-                        target_channel: "push",
-                        include_aliases: { external_id: targets },
-                        headings: { en: title },
-                        contents: { en: body }
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, body, targets })
                 });
             } catch (e) { console.error("Erreur envoi notification :", e); }
         }
