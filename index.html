@@ -513,21 +513,36 @@
             await OneSignal.init({ appId: ONESIGNAL_APP_ID });
         });
 
-        // CODE CORRIGÉ POUR FORCER L'OUVERTURE DE LA DEMANDE DE PERMISSION
+        // GESTIONNAIRE DE NOTIFICATIONS ROBUSTE SUR MOBILE
         function requestNotificationPermission() {
-            if (!currentUser) return;
+            if (!currentUser) {
+                alert("Profil non défini.");
+                return;
+            }
+
+            // Vérification HTTPS obligatoire pour le bon fonctionnement de OneSignal
+            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+                alert("⚠️ Les notifications Push nécessitent une connexion sécurisée en HTTPS !");
+                return;
+            }
+
             OneSignalDeferred.push(async function (OneSignal) {
                 try {
-                    // Utilise la boîte de dialogue Slidedown de OneSignal qui fonctionne à coup sûr sur mobile
-                    await OneSignal.Slidedown.promptPush({ slidedownOptions: { type: 'push' } });
+                    // Demande directe de permission auprès du navigateur mobile
+                    await OneSignal.Notifications.requestPermission();
                     
-                    await OneSignal.User.PushSubscription.optIn();
-                    await OneSignal.login(currentUser);
-                    database.ref('users/' + currentUser).update({ active: true });
-                    alert("Demande de notification lancée ! Acceptez l'invitation qui s'affiche.");
+                    if (OneSignal.Notifications.permission) {
+                        await OneSignal.User.PushSubscription.optIn();
+                        if (currentUser) {
+                            await OneSignal.login(currentUser);
+                            database.ref('users/' + currentUser).update({ active: true });
+                        }
+                        alert("✅ Notifications activées avec succès !");
+                    } else {
+                        alert("⚠️ L'autorisation des notifications a été refusée sur votre téléphone.");
+                    }
                 } catch (err) {
-                    console.error("Erreur notification :", err);
-                    alert("Erreur lors de l'activation. Vérifiez que vous êtes bien en HTTPS.");
+                    alert("Erreur lors de l'activation : " + (err.message || err));
                 }
             });
         }
@@ -535,11 +550,13 @@
         function syncOneSignalLogin() {
             if (!currentUser) return;
             OneSignalDeferred.push(async function (OneSignal) {
-                if (OneSignal.Notifications.permission) {
-                    await OneSignal.User.PushSubscription.optIn();
-                    await OneSignal.login(currentUser);
-                    database.ref('users/' + currentUser).update({ active: true });
-                }
+                try {
+                    if (OneSignal.Notifications.permission) {
+                        await OneSignal.User.PushSubscription.optIn();
+                        await OneSignal.login(currentUser);
+                        database.ref('users/' + currentUser).update({ active: true });
+                    }
+                } catch(e) {}
             });
         }
 
