@@ -536,13 +536,25 @@
             await OneSignal.init({ appId: ONESIGNAL_APP_ID });
         });
 
+        // DEMANDE DE PERMISSION AMÉLIORÉE & CORRIGÉE
         function requestNotificationPermission() {
             if (!currentUser) return;
             OneSignalDeferred.push(async function (OneSignal) {
-                await OneSignal.Notifications.requestPermission();
-                await OneSignal.login(currentUser);
-                database.ref('users/' + currentUser).update({ active: true });
-                alert("Demande de notification envoyée !");
+                try {
+                    // 1. Force l'activation si l'utilisateur avait été désabonné
+                    await OneSignal.User.PushSubscription.optIn();
+                    
+                    // 2. Déclenche la modale système du navigateur Chrome
+                    await OneSignal.Notifications.requestPermission();
+                    
+                    // 3. Connexion de l'utilisateur
+                    await OneSignal.login(currentUser);
+                    
+                    // 4. Mise à jour Firebase
+                    database.ref('users/' + currentUser).update({ active: true });
+                } catch (err) {
+                    console.error("Erreur lors de la demande de permission :", err);
+                }
             });
         }
 
@@ -551,8 +563,11 @@
         function syncOneSignalLogin() {
             if (!currentUser) return;
             OneSignalDeferred.push(async function (OneSignal) {
-                await OneSignal.login(currentUser);
-                database.ref('users/' + currentUser).update({ active: true });
+                if (OneSignal.Notifications.permission) {
+                    await OneSignal.User.PushSubscription.optIn();
+                    await OneSignal.login(currentUser);
+                    database.ref('users/' + currentUser).update({ active: true });
+                }
             });
         }
 
@@ -910,4 +925,3 @@
     </script>
 </body>
 </html>
-
