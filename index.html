@@ -527,8 +527,6 @@
         }
 
         /* NOTIFICATIONS PUSH (OneSignal, via un relais Cloudflare Worker) */
-        // ⚠️ Remplace cette valeur par l'adresse de ton Worker une fois déployé
-        // (ex: "https://lyvine-push.tonpseudo.workers.dev")
         const ONESIGNAL_APP_ID = "d865bb62-492e-49fd-989d-33074c670509";
         const PUSH_RELAY_URL = "https://lyvine-push.loicyoane49.workers.dev";
 
@@ -544,6 +542,7 @@
                 await OneSignal.Notifications.requestPermission();
                 await OneSignal.login(currentUser);
                 database.ref('users/' + currentUser).update({ active: true });
+                alert("Demande de notification envoyée !");
             });
         }
 
