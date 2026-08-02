@@ -58,7 +58,6 @@
         body { background-color: var(--light-bg); color: var(--text); display: flex; justify-content: center; transition: all 0.3s ease; }
         .app-container { width: 100%; max-width: 480px; min-height: 100vh; padding-bottom: 95px; position: relative; }
 
-        /* HEADER AVEC ICÔNE VIERGE (FEUILLE) x CANCER (LUNE) */
         header { 
             background: var(--primary-gradient); 
             color: white; padding: 30px 20px 25px 20px; text-align: center; 
@@ -66,7 +65,6 @@
             position: relative; box-shadow: 0 8px 25px rgba(0, 168, 107, 0.3);
         }
         
-        /* LOGO ICÔNE SUR MESURE */
         .app-logo {
             width: 60px; height: 60px; margin: 0 auto 12px auto;
             background: rgba(255, 255, 255, 0.25); border-radius: 50%;
@@ -85,7 +83,6 @@
         }
         .notif-badge-btn:hover { background: rgba(255,255,255,0.4); transform: scale(1.05); }
 
-        /* MODALES */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(4, 120, 87, 0.7); display: flex; align-items: center; justify-content: center; z-index: 1000;
@@ -99,7 +96,6 @@
         .modal-card button { background: var(--primary-gradient); color: white; border: none; padding: 14px 20px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .modal-card .close-btn { background: var(--gray); margin-top: 8px; box-shadow: none; }
 
-        /* BOUTONS ET CARTES */
         .love-section { padding: 20px 20px 10px 20px; text-align: center; }
         .love-btn {
             background: var(--accent-gradient);
@@ -122,14 +118,12 @@
         .content-section { padding: 15px 20px; display: none; }
         .content-section.active { display: block; }
 
-        /* CHAT */
         .love-history { display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; padding: 10px 5px; }
         .chat-bubble { max-width: 80%; padding: 12px 16px; border-radius: 20px; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
         .chat-bubble.sent { align-self: flex-end; background: var(--primary-gradient); color: white; border-bottom-right-radius: 4px; }
         .chat-bubble.received { align-self: flex-start; background: var(--border); color: var(--text); border-bottom-left-radius: 4px; }
         .chat-bubble .chat-time { font-size: 10px; opacity: 0.8; margin-top: 4px; text-align: right; }
 
-        /* FORMULAIRES & FEED */
         .custom-card { background: var(--card-bg); padding: 20px; border-radius: 22px; margin-bottom: 20px; box-shadow: var(--shadow); border: 1.5px solid var(--border); }
         .custom-card input, .custom-card select, .custom-card textarea { 
             width: 100%; padding: 12px 14px; margin-bottom: 12px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 14px; outline: none; background: var(--card-bg); color: var(--text);
@@ -142,7 +136,6 @@
         .media-info { padding: 16px; }
         .media-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--gray); margin-bottom: 6px; }
 
-        /* AGENDA */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .calendar-header button { background: none; border: none; font-size: 18px; color: var(--primary); cursor: pointer; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; margin-bottom: 20px; }
@@ -157,7 +150,6 @@
         }
         .delete-btn { color: #EF4444; background: none; border: none; cursor: pointer; padding: 6px; font-size: 16px; }
 
-        /* RECHERCHE PROCHES */
         .search-bar { position: relative; margin-bottom: 15px; }
         .search-bar input {
             width: 100%; padding: 14px 15px 14px 42px; border: 1.5px solid var(--border);
@@ -168,7 +160,6 @@
         .contact-info h5 { color: var(--primary); font-size: 16px; margin-bottom: 3px; font-weight: 700; }
         .contact-badge { display: inline-block; background: var(--border); color: var(--primary); font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 700; margin-top: 4px; }
 
-        /* PARAMÈTRES */
         .theme-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
         .theme-option {
             padding: 12px; border-radius: 16px; border: 2px solid var(--border); background: var(--card-bg);
@@ -176,7 +167,6 @@
         }
         .theme-option.active { border-color: var(--primary); color: var(--primary); transform: scale(1.03); }
 
-        /* NAVBAR FIXÉE */
         .bottom-nav {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
             width: 100%; max-width: 480px; height: 75px;
@@ -192,7 +182,6 @@
 </head>
 <body>
 
-    <!-- Modale Profil -->
     <div id="profileModal" class="modal-overlay">
         <div class="modal-card">
             <h2>Bienvenue sur Lyvine 🌿</h2>
@@ -203,7 +192,6 @@
         </div>
     </div>
 
-    <!-- Modale Pensée -->
     <div id="loveModal" class="modal-overlay" style="display: none;">
         <div class="modal-card">
             <h3>Envoyer une pensée ❤️</h3>
@@ -220,7 +208,6 @@
         </div>
     </div>
 
-    <!-- Modales Chat & Historique -->
     <div id="historyModal" class="modal-overlay" style="display: none;">
         <div class="modal-card" style="max-width: 400px;">
             <h3>Historique des pensées ❤️</h3>
@@ -247,7 +234,6 @@
                 <i class="fa-solid fa-bell"></i>
             </button>
             
-            <!-- ICÔNE SUR-MESURE : Vierge (Feuille 🌱) x Cancer (Lune 🌙) -->
             <div class="app-logo" title="Icône Lyvine : Vierge & Cancer">
                 <i class="fa-solid fa-moon"></i>
                 <i class="fa-solid fa-leaf"></i>
@@ -278,7 +264,6 @@
             </div>
         </div>
 
-        <!-- ONGLET 1 : PUBLICATIONS -->
         <div id="posts" class="content-section active">
             <h3 style="color: var(--primary); margin-bottom: 15px;">Publications 📸</h3>
             
@@ -293,7 +278,6 @@
             <div class="media-feed" id="mediaFeed"></div>
         </div>
 
-        <!-- ONGLET 2 : AGENDA -->
         <div id="calendar" class="content-section">
             <h3 style="color: var(--primary); margin-bottom: 15px;">Agenda Partagé 📅</h3>
             
@@ -325,7 +309,6 @@
             <div id="eventList"></div>
         </div>
 
-        <!-- ONGLET 3 : PROCHES -->
         <div id="contacts" class="content-section">
             <h3 style="color: var(--primary); margin-bottom: 15px;">Carnet des Proches 👥</h3>
             
@@ -350,7 +333,6 @@
             <div id="contactsFeed"></div>
         </div>
 
-        <!-- ONGLET 4 : WISHLIST -->
         <div id="wishlist" class="content-section">
             <h3 style="color: var(--primary); margin-bottom: 15px;">Wishlist 🎁</h3>
             
@@ -365,7 +347,6 @@
             <div id="wishlistFeed"></div>
         </div>
 
-        <!-- ONGLET 5 : PARAMÈTRES -->
         <div id="settings" class="content-section">
             <h3 style="color: var(--primary); margin-bottom: 15px;">Paramètres ⚙️</h3>
             
@@ -406,7 +387,6 @@
             </div>
         </div>
 
-        <!-- NAVIGATION -->
         <nav class="bottom-nav">
             <button class="nav-item active" onclick="switchTab('posts', this)"><i class="fa-solid fa-newspaper"></i>Publis</button>
             <button class="nav-item" onclick="switchTab('calendar', this)"><i class="fa-solid fa-calendar-days"></i>Agenda</button>
@@ -478,7 +458,6 @@
             checkUpcomingEventsAlerts();
         }
 
-        /* THÈMES */
         function setTheme(themeName) {
             document.documentElement.setAttribute('data-theme', themeName);
             localStorage.setItem('lyvine_theme', themeName);
@@ -508,7 +487,6 @@
             }
         }
 
-        /* SON DE NOTIFICATION */
         function playNotificationSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -526,7 +504,6 @@
             } catch(e) {}
         }
 
-        /* NOTIFICATIONS PUSH (OneSignal, via un relais Cloudflare Worker) */
         const ONESIGNAL_APP_ID = "3bf1b59a-7836-45d5-bdb9-4aa17936d02b";
         const PUSH_RELAY_URL = "https://lyvine-push.loicyoane49.workers.dev";
 
@@ -536,30 +513,25 @@
             await OneSignal.init({ appId: ONESIGNAL_APP_ID });
         });
 
-        // DEMANDE DE PERMISSION AMÉLIORÉE & CORRIGÉE
+        // CODE CORRIGÉ POUR FORCER L'OUVERTURE DE LA DEMANDE DE PERMISSION
         function requestNotificationPermission() {
             if (!currentUser) return;
             OneSignalDeferred.push(async function (OneSignal) {
                 try {
-                    // 1. Force l'activation si l'utilisateur avait été désabonné
+                    // Utilise la boîte de dialogue Slidedown de OneSignal qui fonctionne à coup sûr sur mobile
+                    await OneSignal.Slidedown.promptPush({ slidedownOptions: { type: 'push' } });
+                    
                     await OneSignal.User.PushSubscription.optIn();
-                    
-                    // 2. Déclenche la modale système du navigateur Chrome
-                    await OneSignal.Notifications.requestPermission();
-                    
-                    // 3. Connexion de l'utilisateur
                     await OneSignal.login(currentUser);
-                    
-                    // 4. Mise à jour Firebase
                     database.ref('users/' + currentUser).update({ active: true });
+                    alert("Demande de notification lancée ! Acceptez l'invitation qui s'affiche.");
                 } catch (err) {
-                    console.error("Erreur lors de la demande de permission :", err);
+                    console.error("Erreur notification :", err);
+                    alert("Erreur lors de l'activation. Vérifiez que vous êtes bien en HTTPS.");
                 }
             });
         }
 
-        // Appelé automatiquement au chargement : ne redemande rien, juste ré-associe
-        // le profil si la permission a déjà été accordée précédemment.
         function syncOneSignalLogin() {
             if (!currentUser) return;
             OneSignalDeferred.push(async function (OneSignal) {
@@ -571,7 +543,6 @@
             });
         }
 
-        // Envoie une notification à l'autre personne (pas à soi-même), via le relais
         async function sendPushToPartner(title, body) {
             try {
                 const snap = await database.ref('users').once('value');
@@ -587,7 +558,6 @@
             } catch (e) { console.error("Erreur envoi notification :", e); }
         }
 
-        /* PROCHES MASQUÉS / RECHERCHE */
         function addContact() {
             const name = document.getElementById('contactName').value.trim();
             const relation = document.getElementById('contactRelation').value.trim();
@@ -611,7 +581,7 @@
             document.getElementById('contactBirthday').value = '';
             document.getElementById('contactPhone').value = '';
             document.getElementById('contactNotes').value = '';
-            alert("Proche enregistré ! Tapez son nom dans la barre pour l'afficher.");
+            alert("Proche enregistré !");
         }
 
         function deleteContact(id) {
@@ -630,7 +600,6 @@
         function renderContacts(data) {
             const feed = document.getElementById('contactsFeed');
             feed.innerHTML = '';
-
             const term = document.getElementById('contactSearch').value.trim();
 
             if (term === "") {
@@ -670,18 +639,15 @@
                 renderContacts({});
                 return;
             }
-
             const filtered = {};
             Object.entries(allContactsCache).forEach(([id, c]) => {
                 if (c.name.toLowerCase().includes(term) || c.relation.toLowerCase().includes(term)) {
                     filtered[id] = c;
                 }
             });
-
             renderContacts(filtered);
         }
 
-        /* PUBLICATIONS */
         function updateFileName(input) {
             const label = document.getElementById('fileLabel');
             label.innerText = input.files && input.files[0] ? "Sélectionné : " + input.files[0].name : "Aucun fichier sélectionné";
@@ -731,7 +697,6 @@
             });
         }
 
-        /* AGENDA */
         function renderCalendar() {
             const daysContainer = document.getElementById('calendarDays');
             daysContainer.innerHTML = '';
@@ -809,7 +774,6 @@
             });
         }
 
-        /* WISHLIST */
         function addWish() {
             const title = document.getElementById('wishTitle').value.trim();
             if (!title) return;
@@ -846,7 +810,6 @@
             });
         }
 
-        /* MESSAGERIE */
         function openLoveModal() { document.getElementById('loveModal').style.display = 'flex'; }
         function closeLoveModal() { document.getElementById('loveModal').style.display = 'none'; }
         function openHistoryModal() { document.getElementById('historyModal').style.display = 'flex'; }
